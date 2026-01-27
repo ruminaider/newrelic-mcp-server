@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  newrelic-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: newrelic-mcp:local
+    container_name: newrelic-mcp
+    environment:
+      - NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
+      - NEW_RELIC_ACCOUNT_ID=${NEW_RELIC_ACCOUNT_ID}
+      - NEW_RELIC_REGION=${NEW_RELIC_REGION:-US}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    stdin_open: true
+    # For MCP stdio transport, the container communicates via stdin/stdout
+    # Use: docker compose run --rm newrelic-mcp
+
+  # Development service with hot reload (for testing)
+  newrelic-mcp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: newrelic-mcp-dev
+    environment:
+      - NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
+      - NEW_RELIC_ACCOUNT_ID=${NEW_RELIC_ACCOUNT_ID}
+      - NEW_RELIC_REGION=${NEW_RELIC_REGION:-US}
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
+    volumes:
+      - ./src:/app/src:ro
+    command: ["npm", "run", "dev"]
+    stdin_open: true
+    profiles:
+      - dev
