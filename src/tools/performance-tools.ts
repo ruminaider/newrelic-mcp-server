@@ -11,6 +11,7 @@ import {
   analyzeTransactions,
 } from "../services/performance-service.js";
 import { EntityNotFoundError } from "../utils/errors.js";
+import { formatResponse } from "../utils/response.js";
 
 /**
  * Schema for analyze_golden_metrics tool input
@@ -104,7 +105,7 @@ export function registerAnalyzeGoldenMetricsTool(server: McpServer): void {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify(formattedResponse, null, 2),
+              text: formatResponse(formattedResponse),
             },
           ],
         };
@@ -114,7 +115,7 @@ export function registerAnalyzeGoldenMetricsTool(server: McpServer): void {
             content: [
               {
                 type: "text" as const,
-                text: JSON.stringify({
+                text: formatResponse({
                   error: "Entity not found",
                   guid: params.guid,
                   message: error.message,
@@ -235,7 +236,7 @@ export function registerAnalyzeTransactionsTool(server: McpServer): void {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify(formattedResponse, null, 2),
+              text: formatResponse(formattedResponse),
             },
           ],
         };

@@ -8,6 +8,7 @@ import { z } from "zod";
 import { getEntityService } from "../services/entity-service.js";
 import { defaultLogger } from "../utils/logger.js";
 import { EntityNotFoundError } from "../utils/errors.js";
+import { formatResponse } from "../utils/response.js";
 
 /**
  * Formats entity tags for display
@@ -78,7 +79,7 @@ export function registerGetEntityTool(server: McpServer): void {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify(response, null, 2),
+              text: formatResponse(response),
             },
           ],
         };
@@ -173,7 +174,7 @@ export function registerListRelatedEntitiesTool(server: McpServer): void {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify(response, null, 2),
+              text: formatResponse(response),
             },
           ],
         };
@@ -296,7 +297,7 @@ export function registerSearchEntityWithTagTool(server: McpServer): void {
         content: [
           {
             type: "text" as const,
-            text: JSON.stringify(response, null, 2),
+            text: formatResponse(response),
           },
         ],
       };
@@ -347,7 +348,7 @@ export function registerListEntityTypesTool(server: McpServer): void {
         content: [
           {
             type: "text" as const,
-            text: JSON.stringify(response, null, 2),
+            text: formatResponse(response),
           },
         ],
       };

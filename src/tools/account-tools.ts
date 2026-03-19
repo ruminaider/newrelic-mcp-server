@@ -7,6 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { getEntityService } from "../services/entity-service.js";
 import { getNerdGraphClient } from "../services/nerdgraph-client.js";
 import { defaultLogger } from "../utils/logger.js";
+import { formatResponse } from "../utils/response.js";
 
 /**
  * Registers the list_available_new_relic_accounts tool
@@ -40,7 +41,7 @@ export function registerListAccountsTool(server: McpServer): void {
         content: [
           {
             type: "text" as const,
-            text: JSON.stringify(response, null, 2),
+            text: formatResponse(response),
           },
         ],
       };

@@ -6,6 +6,7 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { defaultLogger } from "../utils/logger.js";
+import { formatResponse } from "../utils/response.js";
 import { listSyntheticMonitors } from "../services/synthetic-service.js";
 
 /**
@@ -110,7 +111,7 @@ export function registerListSyntheticMonitorsTool(server: McpServer): void {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify(formattedResponse, null, 2),
+              text: formatResponse(formattedResponse),
             },
           ],
         };

@@ -6,6 +6,7 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { defaultLogger } from "../utils/logger.js";
+import { formatResponse } from "../utils/response.js";
 
 /**
  * Schema for convert_time_period_to_epoch_ms tool input
@@ -166,7 +167,7 @@ export function registerConvertTimePeriodTool(server: McpServer): void {
             content: [
               {
                 type: "text" as const,
-                text: JSON.stringify({
+                text: formatResponse({
                   error: "Unable to parse time string",
                   input: params.timeString,
                   supportedFormats: [
@@ -201,7 +202,7 @@ export function registerConvertTimePeriodTool(server: McpServer): void {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify(formattedResponse, null, 2),
+              text: formatResponse(formattedResponse),
             },
           ],
         };

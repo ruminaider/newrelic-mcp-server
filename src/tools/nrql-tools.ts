@@ -13,6 +13,7 @@ import {
   type LogQueryResult,
 } from "../services/log-service.js";
 import { NrqlSyntaxError } from "../utils/errors.js";
+import { formatResponse } from "../utils/response.js";
 
 // ============================================================================
 // Zod Schemas for Tool Inputs
@@ -397,7 +398,7 @@ function formatNrqlResult(result: NrqlQueryResult): CallToolResult {
       },
       {
         type: "text",
-        text: JSON.stringify({ summary, ...resultData }, null, 2),
+        text: formatResponse({ summary, ...resultData }),
       },
     ],
   };
@@ -437,15 +438,11 @@ function formatLogResult(result: LogQueryResult, description: string): CallToolR
       },
       {
         type: "text",
-        text: JSON.stringify(
-          {
+        text: formatResponse({
             summary,
             levelDistribution: levelCounts,
             ...logData,
-          },
-          null,
-          2
-        ),
+          }),
       },
     ],
   };
@@ -477,7 +474,7 @@ function formatErrorResult(error: unknown, context: string): CallToolResult {
       },
       {
         type: "text",
-        text: JSON.stringify(errorDetails, null, 2),
+        text: formatResponse(errorDetails),
       },
     ],
     isError: true,
@@ -700,7 +697,7 @@ export function registerNrqlTools(server: McpServer): number {
             },
             {
               type: "text",
-              text: JSON.stringify(guidance, null, 2),
+              text: formatResponse(guidance),
             },
           ],
         };

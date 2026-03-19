@@ -8,6 +8,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { defaultLogger } from "../utils/logger.js";
 import { getDashboard, listDashboards } from "../services/dashboard-service.js";
 import { EntityNotFoundError } from "../utils/errors.js";
+import { formatResponse } from "../utils/response.js";
 
 /**
  * Schema for get_dashboard tool input
@@ -83,7 +84,7 @@ export function registerGetDashboardTool(server: McpServer): void {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify(formattedResponse, null, 2),
+              text: formatResponse(formattedResponse),
             },
           ],
         };
@@ -93,7 +94,7 @@ export function registerGetDashboardTool(server: McpServer): void {
             content: [
               {
                 type: "text" as const,
-                text: JSON.stringify({
+                text: formatResponse({
                   error: "Dashboard not found",
                   guid: params.guid,
                   message: error.message,
@@ -149,7 +150,7 @@ export function registerListDashboardsTool(server: McpServer): void {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify(formattedResponse, null, 2),
+              text: formatResponse(formattedResponse),
             },
           ],
         };
