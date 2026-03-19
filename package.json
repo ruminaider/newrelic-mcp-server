@@ -1,7 +1,7 @@
 {
   "name": "newrelic-mcp-server",
-  "description": "Full-featured NewRelic MCP server with 26+ tools",
-  "version": "1.0.0",
+  "description": "A comprehensive MCP server for NewRelic — 25 tools for NRQL, entities, alerts, dashboards, logs, and more",
+  "version": "2.1.0",
   "type": "module",
   "module": "index.ts",
   "bin": {
@@ -24,9 +24,17 @@
   },
   "keywords": [
     "newrelic",
+    "new-relic",
     "mcp",
+    "mcp-server",
+    "model-context-protocol",
     "observability",
-    "monitoring"
+    "monitoring",
+    "apm",
+    "nerdgraph",
+    "ai-tools",
+    "llm-tools",
+    "claude"
   ],
   "author": "Albert Gwo",
   "license": "MIT",
