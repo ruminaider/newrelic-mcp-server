@@ -1,5 +1,5 @@
 {
-  "name": "newrelic-mcp-server",
+  "name": "@ruminaider/newrelic-mcp-server",
   "description": "A comprehensive MCP server for NewRelic — 25 tools for NRQL, entities, alerts, dashboards, logs, and more",
   "version": "2.1.0",
   "type": "module",

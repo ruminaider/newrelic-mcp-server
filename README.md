@@ -2,7 +2,7 @@
 
 A comprehensive MCP server for NewRelic with 25 tools for querying, monitoring, and analyzing your observability data — NRQL, entities, alerts, dashboards, logs, and more.
 
-[![npm version](https://img.shields.io/npm/v/newrelic-mcp-server)](https://www.npmjs.com/package/newrelic-mcp-server)
+[![npm version](https://img.shields.io/npm/v/@ruminaider/newrelic-mcp-server)](https://www.npmjs.com/package/@ruminaider/newrelic-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Quick Start
@@ -17,7 +17,7 @@ Add to your `.mcp.json`:
     "newrelic": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "newrelic-mcp-server"],
+      "args": ["-y", "@ruminaider/newrelic-mcp-server"],
       "env": {
         "NEW_RELIC_API_KEY": "NRAK-XXXXXXXXXXXX",
         "NEW_RELIC_ACCOUNT_ID": "1234567"
