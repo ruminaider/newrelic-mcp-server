@@ -30,13 +30,17 @@ const LIST_STRIP_FIELDS = new Set([
 
 function stripFields(obj: unknown, fieldsToStrip: Set<string>): unknown {
 	if (obj === null || obj === undefined) return obj;
-	if (Array.isArray(obj)) return obj.map((item) => stripFields(item, fieldsToStrip));
+	if (Array.isArray(obj))
+		return obj.map((item) => stripFields(item, fieldsToStrip));
 	if (typeof obj !== "object") return obj;
 
 	const result: Record<string, unknown> = {};
 	for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
 		if (fieldsToStrip.has(key)) continue;
-		result[key] = typeof value === "object" && value !== null ? stripFields(value, fieldsToStrip) : value;
+		result[key] =
+			typeof value === "object" && value !== null
+				? stripFields(value, fieldsToStrip)
+				: value;
 	}
 	return result;
 }

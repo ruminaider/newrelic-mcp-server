@@ -3,33 +3,33 @@
  * Provides methods to list and query synthetic monitors via NerdGraph API
  */
 
-import { getNerdGraphClient } from "./nerdgraph-client.js";
 import { defaultLogger } from "../utils/logger.js";
+import { getNerdGraphClient } from "./nerdgraph-client.js";
 
 /**
  * Synthetic monitor summary status
  */
 export interface MonitorSummary {
-  status: string;
-  successRate: number | null;
+	status: string;
+	successRate: number | null;
 }
 
 /**
  * Synthetic monitor entity
  */
 export interface SyntheticMonitor {
-  guid: string;
-  name: string;
-  monitorSummary: MonitorSummary | null;
+	guid: string;
+	name: string;
+	monitorSummary: MonitorSummary | null;
 }
 
 /**
  * Response from list synthetic monitors query
  */
 export interface ListSyntheticMonitorsResponse {
-  monitors: SyntheticMonitor[];
-  nextCursor: string | null;
-  totalCount: number;
+	monitors: SyntheticMonitor[];
+	nextCursor: string | null;
+	totalCount: number;
 }
 
 /**
@@ -62,22 +62,22 @@ const LIST_SYNTHETIC_MONITORS_QUERY = `
  * Response types from NerdGraph
  */
 interface ListSyntheticMonitorsQueryResponse {
-  actor: {
-    entitySearch: {
-      results: {
-        entities: Array<{
-          guid: string;
-          name: string;
-          monitorSummary?: {
-            status: string;
-            successRate: number | null;
-          } | null;
-        }>;
-        nextCursor: string | null;
-      };
-      count: number;
-    };
-  };
+	actor: {
+		entitySearch: {
+			results: {
+				entities: Array<{
+					guid: string;
+					name: string;
+					monitorSummary?: {
+						status: string;
+						successRate: number | null;
+					} | null;
+				}>;
+				nextCursor: string | null;
+			};
+			count: number;
+		};
+	};
 }
 
 /**
@@ -89,61 +89,61 @@ interface ListSyntheticMonitorsQueryResponse {
  * @returns List of synthetic monitors with pagination info
  */
 export async function listSyntheticMonitors(
-  accountId?: string,
-  status?: string,
-  cursor?: string,
-  limit: number = 50
+	accountId?: string,
+	status?: string,
+	cursor?: string,
+	limit = 50,
 ): Promise<ListSyntheticMonitorsResponse> {
-  const client = getNerdGraphClient();
-  const effectiveAccountId = accountId ?? client.getAccountId();
+	const client = getNerdGraphClient();
+	const effectiveAccountId = accountId ?? client.getAccountId();
 
-  defaultLogger.info("Listing synthetic monitors", {
-    accountId: effectiveAccountId,
-    status,
-    cursor,
-    limit,
-  });
+	defaultLogger.info("Listing synthetic monitors", {
+		accountId: effectiveAccountId,
+		status,
+		cursor,
+		limit,
+	});
 
-  // Build search query for synthetic monitors in the specified account
-  let searchQuery = `domain = 'SYNTH' AND accountId = ${effectiveAccountId}`;
+	// Build search query for synthetic monitors in the specified account
+	let searchQuery = `domain = 'SYNTH' AND accountId = ${effectiveAccountId}`;
 
-  // Add status filter if provided
-  if (status) {
-    searchQuery += ` AND reporting = '${status.toUpperCase()}'`;
-  }
+	// Add status filter if provided
+	if (status) {
+		searchQuery += ` AND reporting = '${status.toUpperCase()}'`;
+	}
 
-  const response = await client.query<ListSyntheticMonitorsQueryResponse>(
-    LIST_SYNTHETIC_MONITORS_QUERY,
-    {
-      searchQuery,
-      cursor: cursor || null,
-    }
-  );
+	const response = await client.query<ListSyntheticMonitorsQueryResponse>(
+		LIST_SYNTHETIC_MONITORS_QUERY,
+		{
+			searchQuery,
+			cursor: cursor || null,
+		},
+	);
 
-  const { entities, nextCursor } = response.actor.entitySearch.results;
-  const totalCount = response.actor.entitySearch.count;
+	const { entities, nextCursor } = response.actor.entitySearch.results;
+	const totalCount = response.actor.entitySearch.count;
 
-  // Apply limit
-  const limitedEntities = entities.slice(0, limit);
+	// Apply limit
+	const limitedEntities = entities.slice(0, limit);
 
-  defaultLogger.info("Synthetic monitors listed successfully", {
-    returnedCount: limitedEntities.length,
-    totalCount,
-    hasMore: !!nextCursor,
-  });
+	defaultLogger.info("Synthetic monitors listed successfully", {
+		returnedCount: limitedEntities.length,
+		totalCount,
+		hasMore: !!nextCursor,
+	});
 
-  return {
-    monitors: limitedEntities.map((entity) => ({
-      guid: entity.guid,
-      name: entity.name,
-      monitorSummary: entity.monitorSummary
-        ? {
-            status: entity.monitorSummary.status,
-            successRate: entity.monitorSummary.successRate,
-          }
-        : null,
-    })),
-    nextCursor,
-    totalCount,
-  };
+	return {
+		monitors: limitedEntities.map((entity) => ({
+			guid: entity.guid,
+			name: entity.name,
+			monitorSummary: entity.monitorSummary
+				? {
+						status: entity.monitorSummary.status,
+						successRate: entity.monitorSummary.successRate,
+					}
+				: null,
+		})),
+		nextCursor,
+		totalCount,
+	};
 }

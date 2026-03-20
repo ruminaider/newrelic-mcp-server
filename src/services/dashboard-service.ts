@@ -3,52 +3,52 @@
  * Provides methods to fetch and list dashboards via NerdGraph API
  */
 
-import { getNerdGraphClient } from "./nerdgraph-client.js";
-import { defaultLogger } from "../utils/logger.js";
 import { EntityNotFoundError } from "../utils/errors.js";
+import { defaultLogger } from "../utils/logger.js";
+import { getNerdGraphClient } from "./nerdgraph-client.js";
 
 /**
  * Widget configuration from a dashboard
  */
 export interface DashboardWidget {
-  id: string;
-  title: string;
-  rawConfiguration: Record<string, unknown>;
+	id: string;
+	title: string;
+	rawConfiguration: Record<string, unknown>;
 }
 
 /**
  * Dashboard page containing widgets
  */
 export interface DashboardPage {
-  guid: string;
-  name: string;
-  widgets: DashboardWidget[];
+	guid: string;
+	name: string;
+	widgets: DashboardWidget[];
 }
 
 /**
  * Full dashboard entity with pages and widgets
  */
 export interface Dashboard {
-  guid: string;
-  name: string;
-  pages: DashboardPage[];
+	guid: string;
+	name: string;
+	pages: DashboardPage[];
 }
 
 /**
  * Dashboard list item (summary without full widget details)
  */
 export interface DashboardListItem {
-  guid: string;
-  name: string;
+	guid: string;
+	name: string;
 }
 
 /**
  * Response from list dashboards query
  */
 export interface ListDashboardsResponse {
-  dashboards: DashboardListItem[];
-  nextCursor: string | null;
-  totalCount: number;
+	dashboards: DashboardListItem[];
+	nextCursor: string | null;
+	totalCount: number;
 }
 
 /**
@@ -100,36 +100,36 @@ const LIST_DASHBOARDS_QUERY = `
  * Response types from NerdGraph
  */
 interface GetDashboardResponse {
-  actor: {
-    entity: {
-      guid: string;
-      name: string;
-      pages: Array<{
-        guid: string;
-        name: string;
-        widgets: Array<{
-          id: string;
-          title: string;
-          rawConfiguration: Record<string, unknown>;
-        }>;
-      }>;
-    } | null;
-  };
+	actor: {
+		entity: {
+			guid: string;
+			name: string;
+			pages: Array<{
+				guid: string;
+				name: string;
+				widgets: Array<{
+					id: string;
+					title: string;
+					rawConfiguration: Record<string, unknown>;
+				}>;
+			}>;
+		} | null;
+	};
 }
 
 interface ListDashboardsQueryResponse {
-  actor: {
-    entitySearch: {
-      results: {
-        entities: Array<{
-          guid: string;
-          name: string;
-        }>;
-        nextCursor: string | null;
-      };
-      count: number;
-    };
-  };
+	actor: {
+		entitySearch: {
+			results: {
+				entities: Array<{
+					guid: string;
+					name: string;
+				}>;
+				nextCursor: string | null;
+			};
+			count: number;
+		};
+	};
 }
 
 /**
@@ -139,40 +139,40 @@ interface ListDashboardsQueryResponse {
  * @throws EntityNotFoundError if dashboard doesn't exist
  */
 export async function getDashboard(guid: string): Promise<Dashboard> {
-  const client = getNerdGraphClient();
+	const client = getNerdGraphClient();
 
-  defaultLogger.info("Fetching dashboard", { guid });
+	defaultLogger.info("Fetching dashboard", { guid });
 
-  const response = await client.query<GetDashboardResponse>(
-    GET_DASHBOARD_QUERY,
-    { guid }
-  );
+	const response = await client.query<GetDashboardResponse>(
+		GET_DASHBOARD_QUERY,
+		{ guid },
+	);
 
-  const entity = response.actor.entity;
+	const entity = response.actor.entity;
 
-  if (!entity) {
-    throw new EntityNotFoundError(guid);
-  }
+	if (!entity) {
+		throw new EntityNotFoundError(guid);
+	}
 
-  defaultLogger.info("Dashboard fetched successfully", {
-    guid: entity.guid,
-    name: entity.name,
-    pageCount: entity.pages?.length ?? 0,
-  });
+	defaultLogger.info("Dashboard fetched successfully", {
+		guid: entity.guid,
+		name: entity.name,
+		pageCount: entity.pages?.length ?? 0,
+	});
 
-  return {
-    guid: entity.guid,
-    name: entity.name,
-    pages: (entity.pages ?? []).map((page) => ({
-      guid: page.guid,
-      name: page.name,
-      widgets: (page.widgets ?? []).map((widget) => ({
-        id: widget.id,
-        title: widget.title,
-        rawConfiguration: widget.rawConfiguration,
-      })),
-    })),
-  };
+	return {
+		guid: entity.guid,
+		name: entity.name,
+		pages: (entity.pages ?? []).map((page) => ({
+			guid: page.guid,
+			name: page.name,
+			widgets: (page.widgets ?? []).map((widget) => ({
+				id: widget.id,
+				title: widget.title,
+				rawConfiguration: widget.rawConfiguration,
+			})),
+		})),
+	};
 }
 
 /**
@@ -183,48 +183,48 @@ export async function getDashboard(guid: string): Promise<Dashboard> {
  * @returns List of dashboards with pagination info
  */
 export async function listDashboards(
-  accountId?: string,
-  cursor?: string,
-  limit: number = 50
+	accountId?: string,
+	cursor?: string,
+	limit = 50,
 ): Promise<ListDashboardsResponse> {
-  const client = getNerdGraphClient();
-  const effectiveAccountId = accountId ?? client.getAccountId();
+	const client = getNerdGraphClient();
+	const effectiveAccountId = accountId ?? client.getAccountId();
 
-  defaultLogger.info("Listing dashboards", {
-    accountId: effectiveAccountId,
-    cursor,
-    limit,
-  });
+	defaultLogger.info("Listing dashboards", {
+		accountId: effectiveAccountId,
+		cursor,
+		limit,
+	});
 
-  // Build search query for dashboards in the specified account
-  const searchQuery = `type = 'DASHBOARD' AND accountId = ${effectiveAccountId}`;
+	// Build search query for dashboards in the specified account
+	const searchQuery = `type = 'DASHBOARD' AND accountId = ${effectiveAccountId}`;
 
-  const response = await client.query<ListDashboardsQueryResponse>(
-    LIST_DASHBOARDS_QUERY,
-    {
-      searchQuery,
-      cursor: cursor || null,
-    }
-  );
+	const response = await client.query<ListDashboardsQueryResponse>(
+		LIST_DASHBOARDS_QUERY,
+		{
+			searchQuery,
+			cursor: cursor || null,
+		},
+	);
 
-  const { entities, nextCursor } = response.actor.entitySearch.results;
-  const totalCount = response.actor.entitySearch.count;
+	const { entities, nextCursor } = response.actor.entitySearch.results;
+	const totalCount = response.actor.entitySearch.count;
 
-  // Apply limit (NerdGraph doesn't support limit directly in entitySearch)
-  const limitedEntities = entities.slice(0, limit);
+	// Apply limit (NerdGraph doesn't support limit directly in entitySearch)
+	const limitedEntities = entities.slice(0, limit);
 
-  defaultLogger.info("Dashboards listed successfully", {
-    returnedCount: limitedEntities.length,
-    totalCount,
-    hasMore: !!nextCursor,
-  });
+	defaultLogger.info("Dashboards listed successfully", {
+		returnedCount: limitedEntities.length,
+		totalCount,
+		hasMore: !!nextCursor,
+	});
 
-  return {
-    dashboards: limitedEntities.map((entity) => ({
-      guid: entity.guid,
-      name: entity.name,
-    })),
-    nextCursor,
-    totalCount,
-  };
+	return {
+		dashboards: limitedEntities.map((entity) => ({
+			guid: entity.guid,
+			name: entity.name,
+		})),
+		nextCursor,
+		totalCount,
+	};
 }

@@ -11,48 +11,48 @@ import { defaultLogger } from "./utils/logger.js";
 import { registerAllTools } from "./tools/index.js";
 
 export interface McpServerOptions {
-  config: ServerConfig;
+	config: ServerConfig;
 }
 
 /**
  * Creates and configures the MCP server
  */
 export function createMcpServer(options: McpServerOptions): McpServer {
-  const { config } = options;
+	const { config } = options;
 
-  defaultLogger.info("Creating MCP server", {
-    name: config.name,
-    version: config.version,
-  });
+	defaultLogger.info("Creating MCP server", {
+		name: config.name,
+		version: config.version,
+	});
 
-  const server = new McpServer(
-    {
-      name: config.name,
-      version: config.version,
-    },
-    {
-      capabilities: {
-        tools: {},
-        logging: {},
-      },
-    }
-  );
+	const server = new McpServer(
+		{
+			name: config.name,
+			version: config.version,
+		},
+		{
+			capabilities: {
+				tools: {},
+				logging: {},
+			},
+		},
+	);
 
-  // Register all tools
-  registerAllTools(server);
+	// Register all tools
+	registerAllTools(server);
 
-  return server;
+	return server;
 }
 
 /**
  * Starts the MCP server with stdio transport
  */
 export async function startServer(server: McpServer): Promise<void> {
-  defaultLogger.info("Starting MCP server with stdio transport");
+	defaultLogger.info("Starting MCP server with stdio transport");
 
-  const transport = new StdioServerTransport();
+	const transport = new StdioServerTransport();
 
-  await server.connect(transport);
+	await server.connect(transport);
 
-  defaultLogger.info("MCP server started successfully");
+	defaultLogger.info("MCP server started successfully");
 }

@@ -3,98 +3,98 @@
  * Handles entity retrieval, relationships, and search operations
  */
 
-import { getNerdGraphClient } from "./nerdgraph-client.js";
-import { defaultLogger } from "../utils/logger.js";
 import { EntityNotFoundError } from "../utils/errors.js";
+import { defaultLogger } from "../utils/logger.js";
+import { getNerdGraphClient } from "./nerdgraph-client.js";
 
 /**
  * Tag key-value pair from NewRelic entity
  */
 export interface EntityTag {
-  key: string;
-  values: string[];
+	key: string;
+	values: string[];
 }
 
 /**
  * APM application summary metrics
  */
 export interface ApmSummary {
-  throughput?: number;
-  responseTimeAverage?: number;
-  errorRate?: number;
+	throughput?: number;
+	responseTimeAverage?: number;
+	errorRate?: number;
 }
 
 /**
  * Browser application summary metrics
  */
 export interface BrowserSummary {
-  pageViewCount?: number;
-  ajaxRequestCount?: number;
-  jsErrorRate?: number;
+	pageViewCount?: number;
+	ajaxRequestCount?: number;
+	jsErrorRate?: number;
 }
 
 /**
  * Base entity information from NewRelic
  */
 export interface Entity {
-  guid: string;
-  name: string;
-  type: string;
-  domain: string;
-  entityType: string;
-  reporting?: boolean;
-  tags?: EntityTag[];
-  /** APM-specific summary data */
-  apmSummary?: ApmSummary;
-  /** Browser-specific summary data */
-  browserSummary?: BrowserSummary;
-  /** Account ID the entity belongs to */
-  accountId?: number;
-  /** Alerting severity (if applicable) */
-  alertSeverity?: string;
+	guid: string;
+	name: string;
+	type: string;
+	domain: string;
+	entityType: string;
+	reporting?: boolean;
+	tags?: EntityTag[];
+	/** APM-specific summary data */
+	apmSummary?: ApmSummary;
+	/** Browser-specific summary data */
+	browserSummary?: BrowserSummary;
+	/** Account ID the entity belongs to */
+	accountId?: number;
+	/** Alerting severity (if applicable) */
+	alertSeverity?: string;
 }
 
 /**
  * Related entity information
  */
 export interface RelatedEntityResult {
-  source: {
-    guid: string;
-    name: string;
-    type: string;
-  };
-  target: {
-    guid: string;
-    name: string;
-    type: string;
-  };
-  type: string;
+	source: {
+		guid: string;
+		name: string;
+		type: string;
+	};
+	target: {
+		guid: string;
+		name: string;
+		type: string;
+	};
+	type: string;
 }
 
 /**
  * Entity search results with pagination
  */
 export interface EntitySearchResults {
-  entities: Entity[];
-  nextCursor?: string;
-  totalCount?: number;
+	entities: Entity[];
+	nextCursor?: string;
+	totalCount?: number;
 }
 
 /**
  * Available entity types in NewRelic
  */
 export interface EntityType {
-  domain: string;
-  type: string;
-  displayName?: string;
+	domain: string;
+	type: string;
+	displayName?: string;
 }
 
 /**
  * NewRelic account information
  */
 export interface Account {
-  id: number;
-  name: string;
+	id: number;
+	name: string;
 }
 
 // GraphQL Queries
@@ -219,279 +219,280 @@ query ListEntityTypes {
 // Response Types for GraphQL queries
 
 interface GetEntityResponse {
-  actor: {
-    entity: Entity | null;
-  };
+	actor: {
+		entity: Entity | null;
+	};
 }
 
 interface SearchEntitiesResponse {
-  actor: {
-    entitySearch: {
-      count: number;
-      results: {
-        entities: Entity[];
-        nextCursor: string | null;
-      };
-    };
-  };
+	actor: {
+		entitySearch: {
+			count: number;
+			results: {
+				entities: Entity[];
+				nextCursor: string | null;
+			};
+		};
+	};
 }
 
 interface RelatedEntitiesResponse {
-  actor: {
-    entity: {
-      guid: string;
-      name: string;
-      relatedEntities: {
-        results: Array<{
-          source: {
-            entity: {
-              guid: string;
-              name: string;
-              type: string;
-            };
-          };
-          target: {
-            entity: {
-              guid: string;
-              name: string;
-              type: string;
-            };
-          };
-          type: string;
-        }>;
-      };
-    } | null;
-  };
+	actor: {
+		entity: {
+			guid: string;
+			name: string;
+			relatedEntities: {
+				results: Array<{
+					source: {
+						entity: {
+							guid: string;
+							name: string;
+							type: string;
+						};
+					};
+					target: {
+						entity: {
+							guid: string;
+							name: string;
+							type: string;
+						};
+					};
+					type: string;
+				}>;
+			};
+		} | null;
+	};
 }
 
 interface ListAccountsResponse {
-  actor: {
-    accounts: Account[];
-  };
+	actor: {
+		accounts: Account[];
+	};
 }
 
 interface ListEntityTypesResponse {
-  actor: {
-    entitySearch: {
-      types: Array<{
-        domain: string;
-        type: string;
-        count: number;
-      }>;
-    };
-  };
+	actor: {
+		entitySearch: {
+			types: Array<{
+				domain: string;
+				type: string;
+				count: number;
+			}>;
+		};
+	};
 }
 
 /**
  * Entity management service
  */
 export class EntityService {
-  /**
-   * Retrieves a single entity by its GUID
-   * @param guid Entity GUID
-   * @returns Entity details
-   * @throws EntityNotFoundError if entity doesn't exist
-   */
-  async getEntity(guid: string): Promise<Entity> {
-    const client = getNerdGraphClient();
+	/**
+	 * Retrieves a single entity by its GUID
+	 * @param guid Entity GUID
+	 * @returns Entity details
+	 * @throws EntityNotFoundError if entity doesn't exist
+	 */
+	async getEntity(guid: string): Promise<Entity> {
+		const client = getNerdGraphClient();
 
-    defaultLogger.info("Fetching entity", { guid });
+		defaultLogger.info("Fetching entity", { guid });
 
-    const response = await client.query<GetEntityResponse>(GET_ENTITY_QUERY, {
-      guid,
-    });
+		const response = await client.query<GetEntityResponse>(GET_ENTITY_QUERY, {
+			guid,
+		});
 
-    const entity = response.actor.entity;
+		const entity = response.actor.entity;
 
-    if (!entity) {
-      throw new EntityNotFoundError(guid);
-    }
+		if (!entity) {
+			throw new EntityNotFoundError(guid);
+		}
 
-    defaultLogger.info("Entity fetched successfully", {
-      guid,
-      name: entity.name,
-      type: entity.type,
-    });
+		defaultLogger.info("Entity fetched successfully", {
+			guid,
+			name: entity.name,
+			type: entity.type,
+		});
 
-    return entity;
-  }
+		return entity;
+	}
 
-  /**
-   * Searches for entities using NerdGraph query syntax
-   * @param query Entity search query (e.g., "domain = 'APM' AND type = 'APPLICATION'")
-   * @param cursor Pagination cursor for subsequent pages
-   * @param maxResults Maximum results to return (fetches multiple pages if needed)
-   * @returns Search results with entities and pagination info
-   */
-  async searchEntities(
-    query: string,
-    cursor?: string,
-    maxResults: number = 200
-  ): Promise<EntitySearchResults> {
-    const client = getNerdGraphClient();
+	/**
+	 * Searches for entities using NerdGraph query syntax
+	 * @param query Entity search query (e.g., "domain = 'APM' AND type = 'APPLICATION'")
+	 * @param cursor Pagination cursor for subsequent pages
+	 * @param maxResults Maximum results to return (fetches multiple pages if needed)
+	 * @returns Search results with entities and pagination info
+	 */
+	async searchEntities(
+		query: string,
+		cursor?: string,
+		maxResults = 200,
+	): Promise<EntitySearchResults> {
+		const client = getNerdGraphClient();
 
-    defaultLogger.info("Searching entities", { query, cursor, maxResults });
+		defaultLogger.info("Searching entities", { query, cursor, maxResults });
 
-    const allEntities: Entity[] = [];
-    let currentCursor = cursor;
-    let totalCount = 0;
+		const allEntities: Entity[] = [];
+		let currentCursor = cursor;
+		let totalCount = 0;
 
-    // Fetch pages until we have enough results or run out
-    while (allEntities.length < maxResults) {
-      const response = await client.query<SearchEntitiesResponse>(
-        SEARCH_ENTITIES_QUERY,
-        {
-          query,
-          cursor: currentCursor,
-        }
-      );
+		// Fetch pages until we have enough results or run out
+		while (allEntities.length < maxResults) {
+			const response = await client.query<SearchEntitiesResponse>(
+				SEARCH_ENTITIES_QUERY,
+				{
+					query,
+					cursor: currentCursor,
+				},
+			);
 
-      const { entities, nextCursor } = response.actor.entitySearch.results;
-      totalCount = response.actor.entitySearch.count;
+			const { entities, nextCursor } = response.actor.entitySearch.results;
+			totalCount = response.actor.entitySearch.count;
 
-      allEntities.push(...entities);
+			allEntities.push(...entities);
 
-      // Stop if no more pages
-      if (!nextCursor) {
-        break;
-      }
+			// Stop if no more pages
+			if (!nextCursor) {
+				break;
+			}
 
-      currentCursor = nextCursor;
-    }
+			currentCursor = nextCursor;
+		}
 
-    // Trim to maxResults if we fetched too many
-    const trimmedEntities = allEntities.slice(0, maxResults);
+		// Trim to maxResults if we fetched too many
+		const trimmedEntities = allEntities.slice(0, maxResults);
 
-    defaultLogger.info("Entity search complete", {
-      query,
-      foundCount: trimmedEntities.length,
-      totalCount,
-    });
+		defaultLogger.info("Entity search complete", {
+			query,
+			foundCount: trimmedEntities.length,
+			totalCount,
+		});
 
-    return {
-      entities: trimmedEntities,
-      nextCursor: currentCursor,
-      totalCount,
-    };
-  }
+		return {
+			entities: trimmedEntities,
+			nextCursor: currentCursor,
+			totalCount,
+		};
+	}
 
-  /**
-   * Searches for entities with specific tags
-   * Uses NerdGraph queryBuilder syntax for tag filtering
-   * @param tagKey Tag key to filter by
-   * @param tagValue Tag value to filter by (optional)
-   * @param additionalFilters Additional query filters
-   * @param maxResults Maximum results to return
-   * @returns Matching entities
-   */
-  async searchEntitiesWithTag(
-    tagKey: string,
-    tagValue?: string,
-    additionalFilters?: string,
-    maxResults: number = 200
-  ): Promise<EntitySearchResults> {
-    // Build the query with tag filter
-    let query = tagValue
-      ? `tags.${tagKey} = '${tagValue}'`
-      : `tags.${tagKey} IS NOT NULL`;
+	/**
+	 * Searches for entities with specific tags
+	 * Uses NerdGraph queryBuilder syntax for tag filtering
+	 * @param tagKey Tag key to filter by
+	 * @param tagValue Tag value to filter by (optional)
+	 * @param additionalFilters Additional query filters
+	 * @param maxResults Maximum results to return
+	 * @returns Matching entities
+	 */
+	async searchEntitiesWithTag(
+		tagKey: string,
+		tagValue?: string,
+		additionalFilters?: string,
+		maxResults = 200,
+	): Promise<EntitySearchResults> {
+		// Build the query with tag filter
+		let query = tagValue
+			? `tags.${tagKey} = '${tagValue}'`
+			: `tags.${tagKey} IS NOT NULL`;
 
-    if (additionalFilters) {
-      query = `${query} AND ${additionalFilters}`;
-    }
+		if (additionalFilters) {
+			query = `${query} AND ${additionalFilters}`;
+		}
 
-    defaultLogger.info("Searching entities by tag", {
-      tagKey,
-      tagValue,
-      query,
-    });
+		defaultLogger.info("Searching entities by tag", {
+			tagKey,
+			tagValue,
+			query,
+		});
 
-    return this.searchEntities(query, undefined, maxResults);
-  }
+		return this.searchEntities(query, undefined, maxResults);
+	}
 
-  /**
-   * Gets related entities for a given entity GUID
-   * @param guid Source entity GUID
-   * @returns List of related entity relationships
-   */
-  async getRelatedEntities(guid: string): Promise<RelatedEntityResult[]> {
-    const client = getNerdGraphClient();
+	/**
+	 * Gets related entities for a given entity GUID
+	 * @param guid Source entity GUID
+	 * @returns List of related entity relationships
+	 */
+	async getRelatedEntities(guid: string): Promise<RelatedEntityResult[]> {
+		const client = getNerdGraphClient();
 
-    defaultLogger.info("Fetching related entities", { guid });
+		defaultLogger.info("Fetching related entities", { guid });
 
-    const response = await client.query<RelatedEntitiesResponse>(
-      LIST_RELATED_ENTITIES_QUERY,
-      { guid }
-    );
+		const response = await client.query<RelatedEntitiesResponse>(
+			LIST_RELATED_ENTITIES_QUERY,
+			{ guid },
+		);
 
-    const entity = response.actor.entity;
+		const entity = response.actor.entity;
 
-    if (!entity) {
-      throw new EntityNotFoundError(guid);
-    }
+		if (!entity) {
+			throw new EntityNotFoundError(guid);
+		}
 
-    const results = entity.relatedEntities.results.map((rel) => ({
-      source: {
-        guid: rel.source.entity.guid,
-        name: rel.source.entity.name,
-        type: rel.source.entity.type,
-      },
-      target: {
-        guid: rel.target.entity.guid,
-        name: rel.target.entity.name,
-        type: rel.target.entity.type,
-      },
-      type: rel.type,
-    }));
+		const results = entity.relatedEntities.results.map((rel) => ({
+			source: {
+				guid: rel.source.entity.guid,
+				name: rel.source.entity.name,
+				type: rel.source.entity.type,
+			},
+			target: {
+				guid: rel.target.entity.guid,
+				name: rel.target.entity.name,
+				type: rel.target.entity.type,
+			},
+			type: rel.type,
+		}));
 
-    defaultLogger.info("Related entities fetched", {
-      guid,
-      count: results.length,
-    });
+		defaultLogger.info("Related entities fetched", {
+			guid,
+			count: results.length,
+		});
 
-    return results;
-  }
+		return results;
+	}
 
-  /**
-   * Lists all available entity types in the account
-   * @returns List of entity types with domains
-   */
-  async listEntityTypes(): Promise<EntityType[]> {
-    const client = getNerdGraphClient();
+	/**
+	 * Lists all available entity types in the account
+	 * @returns List of entity types with domains
+	 */
+	async listEntityTypes(): Promise<EntityType[]> {
+		const client = getNerdGraphClient();
 
-    defaultLogger.info("Listing entity types");
+		defaultLogger.info("Listing entity types");
 
-    const response =
-      await client.query<ListEntityTypesResponse>(LIST_ENTITY_TYPES_QUERY);
+		const response = await client.query<ListEntityTypesResponse>(
+			LIST_ENTITY_TYPES_QUERY,
+		);
 
-    const types = response.actor.entitySearch.types.map((t) => ({
-      domain: t.domain,
-      type: t.type,
-      displayName: `${t.domain}/${t.type}`,
-    }));
+		const types = response.actor.entitySearch.types.map((t) => ({
+			domain: t.domain,
+			type: t.type,
+			displayName: `${t.domain}/${t.type}`,
+		}));
 
-    defaultLogger.info("Entity types fetched", { count: types.length });
+		defaultLogger.info("Entity types fetched", { count: types.length });
 
-    return types;
-  }
+		return types;
+	}
 
-  /**
-   * Lists all accessible NewRelic accounts
-   * @returns List of accounts
-   */
-  async listAccounts(): Promise<Account[]> {
-    const client = getNerdGraphClient();
+	/**
+	 * Lists all accessible NewRelic accounts
+	 * @returns List of accounts
+	 */
+	async listAccounts(): Promise<Account[]> {
+		const client = getNerdGraphClient();
 
-    defaultLogger.info("Listing NewRelic accounts");
+		defaultLogger.info("Listing NewRelic accounts");
 
-    const response =
-      await client.query<ListAccountsResponse>(LIST_ACCOUNTS_QUERY);
+		const response =
+			await client.query<ListAccountsResponse>(LIST_ACCOUNTS_QUERY);
 
-    const accounts = response.actor.accounts;
+		const accounts = response.actor.accounts;
 
-    defaultLogger.info("Accounts fetched", { count: accounts.length });
+		defaultLogger.info("Accounts fetched", { count: accounts.length });
 
-    return accounts;
-  }
+		return accounts;
+	}
 }
 
 /**
@@ -503,8 +504,8 @@ let entityServiceInstance: EntityService | null = null;
  * Gets the entity service singleton instance
  */
 export function getEntityService(): EntityService {
-  if (!entityServiceInstance) {
-    entityServiceInstance = new EntityService();
-  }
-  return entityServiceInstance;
+	if (!entityServiceInstance) {
+		entityServiceInstance = new EntityService();
+	}
+	return entityServiceInstance;
 }

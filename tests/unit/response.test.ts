@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { optimizeDetail, optimizeList, formatResponse } from "../../src/utils/response.js";
+import { describe, expect, it } from "vitest";
+import {
+	formatResponse,
+	optimizeDetail,
+	optimizeList,
+} from "../../src/utils/response.js";
 
 describe("optimizeDetail", () => {
 	it("strips __typename and verbose NerdGraph fields", () => {
